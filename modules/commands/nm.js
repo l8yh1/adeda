@@ -4,7 +4,7 @@ const lockedNames = global.nameLocks;
 
 module.exports.config = {
   name: "nm",
-  version: "1.3.2",
+  version: "1.3.1",
   hasPermssion: 1,
   credits: "Gah",
   description: "تغيير اسم المجموعة تلقائياً كل 5 ثوانٍ",
@@ -20,11 +20,8 @@ module.exports.onLoad = function () {
 
     for (const [threadID, lockedName] of lockedNames.entries()) {
       try {
-        // Force the title to be exactly what we want, regardless of server state
         await global.client.api.setTitle(lockedName, threadID);
-      } catch (e) {
-        // If it fails, we keep it in the map to try again next cycle
-      }
+      } catch (e) {}
     }
   }, 5000);
 };
@@ -49,12 +46,8 @@ module.exports.run = async function ({ api, event, args }) {
     return api.sendMessage("🛑 Stopped changing name for this group.", threadID);
   }
 
-  // Set the name immediately and add to active lock list
+  await api.setTitle(name, threadID);
   lockedNames.set(threadID, name);
-  try {
-    await api.setTitle(name, threadID);
-    api.sendMessage(`🔄 Name change active every 5s:\n${name}`, threadID);
-  } catch (err) {
-    api.sendMessage(`⚠️ Initial set failed, but will keep trying every 5s:\n${name}`, threadID);
-  }
+
+  api.sendMessage(`🔄 Name change active every 5s:\n${name}`, threadID);
 };
